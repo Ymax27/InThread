@@ -52,8 +52,6 @@ jobs:
           cache-dependency-path: requirements-dev.txt
       - name: Installer les dépendances réelles
         run: pip install -r requirements-dev.txt
-      - name: Lister les licences
-        run: pip-licenses --from=mixed --format=markdown --with-urls --order=license > THIRD_PARTY_LICENSES.md
       - name: Échouer sur une licence interdite
         run: python scripts/check_licenses.py
       - name: Publier la liste des licences comme artefact
@@ -82,7 +80,7 @@ jobs:
     env:
       APP_ENV: test
       SECRET_KEY: secret-de-ci-suffisant-pour-signer-000000000000
-      ALLOWED_HOSTS: localhost,127.0.0.1
+      ALLOWED_HOSTS: testserver,localhost,127.0.0.1
       DATABASE_URL: postgresql+asyncpg://app:app@127.0.0.1:5432/app
     steps:
       - uses: actions/checkout@v4
