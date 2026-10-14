@@ -1,0 +1,138 @@
+# Intégration continue du projet MboaRec (CADEV 2026).
+# Chaque push et chaque pull request passent les quatre contrôles : lint,
+# licences, tests (PostgreSQL réel) et budget de poids. Le déploiement est
+# désactivé tant que l'environnement Datacloud n'est pas réservé (voir README §12).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Permissions minimales : la CI ne fait que lire le dépôt (règle de sécurité §7).
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  lint:
+    name: Lint et format (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Installer ruff
+        run: pip install -r requirements-dev.txt
+      - name: Vérifier le lint
+        run: ruff check .
+      - name: Vérifier le format
+        run: ruff format --check .
+
+  licenses:
+    name: Licences (pas de GPL / LGPL / AGPL)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Installer les dépendances réelles
+        run: pip install -r requirements-dev.txt
+      - name: Lister les licences
+        run: pip-licenses --from=mixed --format=markdown --with-urls --order=license > THIRD_PARTY_LICENSES.md
+      - name: Échouer sur une licence interdite
+        run: python scripts/check_licenses.py
+      - name: Publier la liste des licences comme artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: third-party-licenses
+          path: THIRD_PARTY_LICENSES.md
+
+  test:
+    name: Tests (pytest + PostgreSQL)
+    runs-on: ubuntu-latest
+    services:
+      db:
+        # Même image que docker-compose.yml : pgvector + pg_trgm + unaccent.
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U app -d app"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    env:
+      APP_ENV: test
+      SECRET_KEY: secret-de-ci-suffisant-pour-signer-000000000000
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      DATABASE_URL: postgresql+asyncpg://app:app@127.0.0.1:5432/app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Installer les dépendances
+        run: pip install -r requirements-dev.txt
+      - name: Appliquer les migrations (vérifie la migration 0001)
+        run: alembic upgrade head
+      - name: Lancer les tests
+        run: pytest
+
+  budget:
+    name: Budget de poids (50 Ko par page)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Installer les dépendances
+        run: pip install -r requirements-dev.txt
+      - name: Compiler le CSS Tailwind
+        run: |
+          ./scripts/get_tailwind.sh
+          ./bin/tailwindcss -i app/static/src/app.css -o app/static/css/app.css --minify
+      - name: Démarrer l'application
+        run: |
+          APP_ENV=development SECRET_KEY=secret-de-ci-pour-le-budget-0000000000000000 \
+            uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 &
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8000/ >/dev/null && break
+            sleep 1
+          done
+      - name: Mesurer le poids de la page d'accueil
+        run: python scripts/page_budget.py http://127.0.0.1:8000/ --budget 50
+
+  # Déploiement continu sur Datacloud : activé en phase 12, quand l'hébergement
+  # est réservé et documenté dans le README §12. Ne pas décommenter avant.
+  # deploy:
+  #   name: Déploiement Datacloud
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   needs: [lint, licenses, test, budget]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Déployer (TODO : méthode exacte — SSH + docker compose, webhook…)
+  #       run: echo "TODO phase 12"

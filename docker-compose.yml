@@ -1,0 +1,80 @@
+# Trois services : base PostgreSQL (pgvector), API web, worker planifié.
+# Usage : cp .env.example .env && docker compose up --build -d
+# Les variables non définies dans .env prennent les valeurs par défaut ci-dessous.
+name: mboa
+
+services:
+  db:
+    # Image communautaire pgvector basée sur PostgreSQL 16 (extensions pg_trgm,
+    # unaccent et vector utilisées par les migrations).
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-app}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  app:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # La base est joignable depuis les conteneurs sous le nom « db ».
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@db:5432/${POSTGRES_DB:-app}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    # Les migrations tournent au démarrage : pas d'étape manuelle oubliable.
+    command: ["sh", "-c", "alembic upgrade head && uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  worker:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@db:5432/${POSTGRES_DB:-app}
+    command: ["python", "-m", "worker.main"]
+    depends_on:
+      db:
+        condition: service_healthy
+    # Pas de serveur HTTP dans le worker : le HEALTHCHECK de l'image ne s'applique pas.
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+
+  # Image de développement (profil optionnel) : ruff, pytest, scripts.
+  #   docker compose --profile dev run --rm dev pytest
+  #   docker compose --profile dev run --rm dev ruff check .
+  dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      target: dev
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@db:5432/${POSTGRES_DB:-app}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:

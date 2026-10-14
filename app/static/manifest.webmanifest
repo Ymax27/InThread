@@ -1,0 +1,20 @@
+{
+  "name": "MboaRec — recettes d'intégration africaines",
+  "short_name": "MboaRec",
+  "description": "Recettes d'intégration africaines vérifiées : MTN MoMo, Orange Money, Wave, SMS, USSD.",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF7F2",
+  "theme_color": "#0F6B4F",
+  "icons": [
+    {
+      "src": "/static/icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{# Layout commun de toutes les pages.
+   - Aucun style ni script inline (imposé par la CSP de app/security/headers.py).
+   - HTMX est chargé seulement hors mode léger : le site fonctionne sans JS.
+   - `hx-boost` rend les liens et formulaires « boostés » dès que HTMX est là. #}
+<!doctype html>
+<html lang="fr" data-lite="{{ '1' if lite else '0' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Recettes d'intégration africaines vérifiées : MTN MoMo, Orange Money, Wave, SMS, USSD.">
+  {# Configuration HTMX sans script inline (autorisé par CSP) #}
+  <meta name="htmx-config" content='{"allowEval": false, "includeIndicatorStyles": false}'>
+  <title>{% block title %}{{ project_name }}{% endblock %}</title>
+  <link rel="icon" href="/static/icons/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <link rel="stylesheet" href="/static/css/app.css?v={{ app_version }}">
+  {% block head %}{% endblock %}
+</head>
+<body hx-boost="true">
+  <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="conteneur site-header__barre">
+      <a class="marque" href="/">
+        <span class="marque__picto" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" focusable="false"><path d="M12 2 L22 12 L12 22 L2 12 Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8 L16 12 L12 16 L8 12 Z" fill="currentColor"/></svg>
+        </span>
+        <span>{{ project_name }}</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Navigation principale">
+        <ul>
+          <li><a href="/" aria-current="page">Accueil</a></li>
+          <li><a href="#etapes">Comment ça marche</a></li>
+          <li><a href="#contribuer">Contribuer</a></li>
+        </ul>
+      </nav>
+
+      {% if lite %}
+      <a class="lien-lie" href="?lite=0">Mode normal</a>
+      {% else %}
+      <a class="lien-lie" href="?lite=1">Mode léger</a>
+      {% endif %}
+    </div>
+    {% if not lite %}{% set motif_id = 'frieze-entete' %}{% include "partials/motif.html" %}{% endif %}
+  </header>
+
+  <main id="contenu" class="conteneur page">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    {% if not lite %}{% set motif_id = 'frieze-pied' %}{% include "partials/motif.html" %}{% endif %}
+    <div class="conteneur site-footer__texte">
+      <p>{{ project_name }} — recettes d'intégration africaines vérifiées.</p>
+      <p>Projet présenté au concours <strong>CADEV 2026</strong> (Systalink) · Yaoundé, Cameroun.</p>
+      <p class="hint">
+        Qualité vérifiée en continue par la CI GitHub Actions (ruff, pytest, licences, poids des pages).
+        Version {{ app_version }} · <a href="?lite=1">Mode léger</a>
+      </p>
+    </div>
+  </footer>
+
+  {% if not lite %}
+  <script src="/static/js/htmx.min.js" defer></script>
+  {% endif %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

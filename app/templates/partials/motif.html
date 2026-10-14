@@ -1,0 +1,13 @@
+{# Filet décoratif : frise de losanges inspirée des textiles, < 1 Ko.
+   Utilisé en séparateur, jamais en fond. `motif_id` évite les ids dupliqués
+   quand la frise apparaît plusieurs fois dans la même page. #}
+{% set motif_id = motif_id|default('frieze') %}
+<svg class="motif" width="100%" height="8" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="{{ motif_id }}" width="14" height="8" patternUnits="userSpaceOnUse">
+      <path d="M7 1 L11 4 L7 7 L3 4 Z" fill="none" stroke="currentColor" stroke-width="1"/>
+      <path d="M0 4 L2 2 M12 6 L14 4" fill="none" stroke="currentColor" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="100%" height="8" fill="url(#{{ motif_id }})"/>
+</svg>

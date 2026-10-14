@@ -1,0 +1,37 @@
+[project]
+name = "mboarec"
+version = "0.1.0" # doit rester aligné sur app/__init__.py::__version__
+description = "Plateforme de recettes d'intégration africaines vérifiées (CADEV 2026)"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [] # les dépendances vivent dans requirements.txt (épinglées, lues par pip)
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv", "bin", "migrations/versions"]
+
+[tool.ruff.lint]
+# E style, F pyflakes, I import, B bugbear, UP modernisation, S sécurité (bandit), ASYNC
+select = ["E", "F", "I", "B", "UP", "S", "ASYNC"]
+ignore = [
+    "S101", # assert autorisé dans les tests (voir per-file-ignores plus bas)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"] # clés factices des fixtures/tests
+"scripts/**" = ["S603", "S607"] # appels de sous-processus explicites
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "double"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."] # permet `import app` sans installation du paquet
+addopts = "-q --strict-markers"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "slow: tests lents (désactivables avec -m 'not slow')",
+]

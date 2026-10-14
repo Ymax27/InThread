@@ -1,0 +1,86 @@
+{# Planche de design interne (/_design, désactivée en production).
+   Max s'en sert pour valider le rendu de chaque composant. #}
+{% from "partials/components.html" import bouton, champ, badge_etat, etiquette_fournisseur,
+   carte_recette, flash, etat_vide, bloc_code, pagination %}
+
+<header class="section">
+  <h1>Planche de design</h1>
+  <p class="hint">Tous les composants du système, hors production. Palette : vert profond, ocre,
+     fond crème, rouge terre. Texte : 14 / 16 / 18 / 22 / 28 / 36 px.</p>
+  {% set motif_id = 'frieze-design' %}{% include "partials/motif.html" %}
+</header>
+
+<section class="section" aria-labelledby="d-typo">
+  <h2 id="d-typo">Typographie</h2>
+  <p class="d-echelle">
+    <span class="d-n1">14 px secondaire</span> ·
+    <span class="d-n0">16 px texte courant</span> ·
+    <span class="d-n1g">18 px intro</span> ·
+    <span class="d-t3">22 px h3</span> ·
+    <span class="d-t2">28 px h2</span> ·
+    <span class="d-t1">36 px h1</span>
+  </p>
+  <p>Texte avec accents : à côté, Émile, ça coûte, N° 123 — <strong>gras</strong>, <em>italique</em>,
+     <a class="lien" href="#d-typo">lien</a>.</p>
+  <p class="hint">Texte secondaire (contraste AA vérifié).</p>
+</section>
+
+<section class="section" aria-labelledby="d-boutons">
+  <h2 id="d-boutons">Boutons</h2>
+  <p class="ligne-composants">
+    {{ bouton('Primaire', '#') }}
+    {{ bouton('Secondaire', '#', 'secondaire') }}
+    {{ bouton('Fantôme', '#', 'fantome') }}
+    <button class="btn btn-primaire" type="submit" disabled>Formulaire</button>
+  </p>
+</section>
+
+<section class="section" aria-labelledby="d-badges">
+  <h2 id="d-badges">Badges d'état (icône + texte, jamais la couleur seule)</h2>
+  <p class="ligne-composants">
+    {{ badge_etat('works') }}
+    {{ badge_etat('broken') }}
+    {{ badge_etat('broken_auto') }}
+    {{ badge_etat('unverified') }}
+    {{ badge_etat('') }}
+    {{ etiquette_fournisseur('MTN MoMo') }}
+    {{ etiquette_fournisseur('Cameroun') }}
+  </p>
+</section>
+
+<section class="section" aria-labelledby="d-formulaires">
+  <h2 id="d-formulaires">Champs de formulaire</h2>
+  <form class="formulaire" action="#" method="get">
+    {{ champ('d-pseudo', 'Pseudo', placeholder='maxdev', aide='Visible publiquement.') }}
+    {{ champ('d-email', 'Adresse e-mail', type='email', obligatoire=true) }}
+    {{ champ('d-erreur', 'Pays', erreur='Choisissez un pays dans la liste.') }}
+    <button class="btn btn-primaire" type="submit">Envoyer</button>
+  </form>
+</section>
+
+<section class="section" aria-labelledby="d-cartes">
+  <h2 id="d-cartes">Carte de recette</h2>
+  <div class="grille-cartes">
+    {% for recette in recettes_exemple %}
+      {{ carte_recette(recette) }}
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section" aria-labelledby="d-messages">
+  <h2 id="d-messages">Messages flash</h2>
+  {{ flash('ok', 'Votre réponse a été publiée.') }}
+  {{ flash('info', 'Ce contenu a été adapté par IA, non vérifié par la sandbox.') }}
+  {{ flash('erreur', 'Connexion refusée : identifiants incorrects.') }}
+</section>
+
+<section class="section" aria-labelledby="d-vide">
+  <h2 id="d-vide">État vide et pagination</h2>
+  {{ etat_vide('Aucune recette pour ce filtre.', 'Essayez un autre fournisseur ou un autre pays.', '/recettes', 'Voir toutes les recettes') }}
+  {{ pagination(2, 5, '/recettes') }}
+</section>
+
+<section class="section" aria-labelledby="d-code">
+  <h2 id="d-code">Bloc de code</h2>
+  {{ bloc_code('import httpx\n\nr = httpx.get(url, timeout=5)\nprint(r.status_code)', 'python') }}
+</section>

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Page introuvable (404) — {{ project_name }}{% endblock %}
+{% block content %}
+<section class="section section-centree">
+  <p class="d-t1" aria-hidden="true">404</p>
+  <h1>Page introuvable</h1>
+  <p>Cette adresse n'existe pas (ou plus). La recherche de recettes arrive à la prochaine phase&nbsp;:
+     en attendant, revenez à l'accueil.</p>
+  <p class="hero__actions">
+    <a class="btn btn-primaire" href="/">Retour à l'accueil</a>
+    <a class="btn btn-secondaire" href="/healthz">Voir l'état du service</a>
+  </p>
+</section>
+{% endblock %}

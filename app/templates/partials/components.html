@@ -1,0 +1,96 @@
+{# Composants du design system (§8).
+   Chaque composant = une macro, importée avec
+   `{% from "partials/components.html" import carte_recette %}`.
+   Règles communes : aucune action ne dépend du JavaScript, cibles ≥ 44 px,
+   et l'état n'est jamais porté par la seule couleur (icône + texte). #}
+
+{% macro bouton(label, href='#', variante='primaire', type='link') %}
+{%- if type == 'submit' -%}
+<button type="submit" class="btn btn-{{ variante }}">{{ label }}</button>
+{%- else -%}
+<a class="btn btn-{{ variante }}" href="{{ href }}">{{ label }}</a>
+{%- endif -%}
+{% endmacro %}
+
+{% macro champ(name, label, type='text', placeholder='', aide='', erreur='', obligatoire=false) %}
+<div class="champ">
+  <label class="label" for="{{ name }}">
+    {{ label }}{% if obligatoire %} <span aria-hidden="true">*</span><span class="sr-only">(obligatoire)</span>{% endif %}
+  </label>
+  <input class="field" id="{{ name }}" name="{{ name }}" type="{{ type }}"
+         placeholder="{{ placeholder }}"{% if obligatoire %} required{% endif %}
+         {% if erreur %}aria-invalid="true" aria-describedby="{{ name }}-erreur"{% endif %}>
+  {% if aide %}<p class="hint" id="{{ name }}-aide">{{ aide }}</p>{% endif %}
+  {% if erreur %}
+  <p class="erreur" id="{{ name }}-erreur" role="alert">{{ erreur }}</p>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro badge_etat(statut) %}
+{%- if statut == 'works' -%}
+<span class="badge badge-works"><span aria-hidden="true">✓</span> Fonctionne</span>
+{%- elif statut == 'broken' -%}
+<span class="badge badge-broken"><span aria-hidden="true">✕</span> Cassée</span>
+{%- elif statut == 'broken_auto' -%}
+<span class="badge badge-broken"><span aria-hidden="true">✕</span> Cassée (auto)</span>
+{%- elif statut == 'unverified' -%}
+<span class="badge badge-unverified"><span aria-hidden="true">!</span> À re-vérifier</span>
+{%- else -%}
+<span class="badge badge-neutre"><span aria-hidden="true">?</span> Non renseigné</span>
+{%- endif -%}
+{% endmacro %}
+
+{% macro etiquette_fournisseur(libelle) %}
+<span class="tag-provider">{{ libelle }}</span>
+{% endmacro %}
+
+{% macro carte_recette(recette) %}
+<article class="card carte-recette">
+  <div class="carte-recette__meta">
+    {{ etiquette_fournisseur(recette.provider_label) }}
+    <span class="tag-provider">{{ recette.country_label }}</span>
+    {% if recette.exemple is defined and recette.exemple %}
+    <span class="badge badge-neutre"><span aria-hidden="true">i</span> Exemple</span>
+    {% endif %}
+  </div>
+  <h3 class="carte-recette__titre">{{ recette.title }}</h3>
+  <p class="carte-recette__probleme">{{ recette.problem }}</p>
+  <div class="carte-recette__pied">
+    {{ badge_etat(recette.status) }}
+    <span class="hint">{{ recette.stack }}</span>
+  </div>
+</article>
+{% endmacro %}
+
+{% macro flash(ton, texte) %}
+<p class="flash flash--{{ ton }}" role="status">
+  {%- if ton == 'ok' -%}<span aria-hidden="true">✓</span>
+  {%- elif ton == 'erreur' -%}<span aria-hidden="true">✕</span>
+  {%- else -%}<span aria-hidden="true">!</span>{% endif -%}
+  {{ texte }}
+</p>
+{% endmacro %}
+
+{% macro etat_vide(titre, texte, action_href='', action_label='') %}
+<div class="etat-vide">
+  <p class="etat-vide__titre">{{ titre }}</p>
+  {% if texte %}<p class="hint">{{ texte }}</p>{% endif %}
+  {% if action_href %}{{ bouton(action_label, action_href, 'secondaire') }}{% endif %}
+</div>
+{% endmacro %}
+
+{% macro bloc_code(code, langage='') %}
+<figure class="bloc-code">
+  {% if langage %}<figcaption class="bloc-code__langage">{{ langage }}</figcaption>{% endif %}
+  <pre class="bloc-code__pre"><code>{{ code }}</code></pre>
+</figure>
+{% endmacro %}
+
+{% macro pagination(page, pages, base_href) %}
+<nav class="pagination" aria-label="Pages">
+  <a class="btn btn-ghost" href="{{ base_href }}?page={{ page - 1 }}"{% if page <= 1 %} aria-disabled="true" tabindex="-1"{% endif %}>← Précédent</a>
+  <span class="pagination__courante">Page {{ page }} / {{ pages }}</span>
+  <a class="btn btn-ghost" href="{{ base_href }}?page={{ page + 1 }}"{% if page >= pages %} aria-disabled="true" tabindex="-1"{% endif %}>Suivant →</a>
+</nav>
+{% endmacro %}

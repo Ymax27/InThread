@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Erreur {{ status_code }} — {{ project_name }}{% endblock %}
+{% block content %}
+<section class="section section-centree">
+  <p class="d-t1" aria-hidden="true">{{ status_code }}</p>
+  <h1>Erreur {{ status_code }}</h1>
+  {% if detail %}<p>{{ detail }}</p>{% endif %}
+  <p class="hero__actions">
+    <a class="btn btn-primaire" href="/">Retour à l'accueil</a>
+  </p>
+</section>
+{% endblock %}

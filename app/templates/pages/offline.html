@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Hors ligne — {{ project_name }}{% endblock %}
+{% block content %}
+<section class="section section-centree">
+  <p class="hero__surtitre" aria-hidden="true">📶</p>
+  <h1>Vous êtes hors ligne</h1>
+  <p>Impossible de joindre le serveur. Les recettes déjà consultées restent disponibles
+     dans la mémoire de votre navigateur&nbsp;:</p>
+  <p class="hero__actions">
+    <a class="btn btn-primaire" href="/">Réessayer</a>
+    <a class="btn btn-secondaire" href="/">Retour à l'accueil</a>
+  </p>
+  <p class="hint">Astuce : le site fonctionne aussi en mode léger (lien « Mode léger » en haut de page).</p>
+</section>
+{% endblock %}

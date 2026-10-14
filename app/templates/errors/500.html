@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Erreur serveur (500) — {{ project_name }}{% endblock %}
+{% block content %}
+<section class="section section-centree">
+  <p class="d-t1" aria-hidden="true">500</p>
+  <h1>Erreur serveur</h1>
+  <p>Une erreur inattendue s'est produite. Réessayez dans un instant&nbsp;; si le problème
+     persiste, signalez-le à l'équipe.</p>
+  <p class="hero__actions">
+    <a class="btn btn-primaire" href="/">Retour à l'accueil</a>
+  </p>
+</section>
+{% endblock %}

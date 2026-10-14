@@ -1,0 +1,86 @@
+{# Sections de la page d'accueil : incluses par pages/home.html et renvoyées
+   telles quelles comme fragment HTMX (partial), donc jamais dupliquées. #}
+{% from "partials/components.html" import bouton, carte_recette %}
+
+<section class="hero">
+  <p class="hero__surtitre">Pour les devs, par les devs 🇨🇲 🇸🇳 🇨🇮</p>
+  <h1 class="hero__titre">Les recettes d'intégration africaines qui marchent vraiment.</h1>
+  <p class="hero__texte">
+    Guides courts et <strong>testés</strong> pour intégrer MTN MoMo, Orange Money, Wave, SMS ou USSD.
+    Chaque recette porte un badge d'état : <strong>vérifiée automatiquement</strong> contre la sandbox
+    MTN, ou <strong>confirmée par la communauté</strong>.
+  </p>
+
+  <form class="recherche" action="/recettes" method="get" role="search">
+    <label class="label" for="q">Rechercher une recette</label>
+    <div class="recherche__ligne">
+      <input class="field" type="search" id="q" name="q" autocomplete="off"
+             placeholder="mtn momo, webhook, FCFA, +237…">
+      <button class="btn btn-primaire" type="submit">Rechercher</button>
+    </div>
+    <p class="hint">Exemples : <code>mtn momo</code> · <code>orange money statut</code> · <code>numéro camerounais</code></p>
+  </form>
+
+  <p class="hero__actions">
+    {{ bouton('Voir les recettes', '/recettes', 'primaire') }}
+    {{ bouton('Proposer une recette', '#contribuer', 'fantome') }}
+  </p>
+</section>
+
+<section id="etapes" class="section" aria-labelledby="titre-etapes">
+  <h2 id="titre-etapes">Comment ça marche</h2>
+  <ol class="etapes">
+    <li class="etape">
+      <span class="etape__numero" aria-hidden="true">1</span>
+      <h3>Recette</h3>
+      <p>Un problème concret, des étapes, du code complet et les pièges à éviter. Testé par son auteur.</p>
+    </li>
+    <li class="etape">
+      <span class="etape__numero" aria-hidden="true">2</span>
+      <h3>Vérifiée</h3>
+      <p>Les recettes MTN MoMo sont rejouées chaque heure contre la sandbox. Les autres sont confirmées par la communauté.</p>
+    </li>
+    <li class="etape">
+      <span class="etape__numero" aria-hidden="true">3</span>
+      <h3>Adaptée</h3>
+      <p>Un bouton « Adapter à ma stack » propose une version Django, Node ou PHP — marquée comme non vérifiée.</p>
+    </li>
+  </ol>
+</section>
+
+<section class="section" aria-labelledby="titre-sandbox">
+  <div class="carte-sandbox">
+    <div class="carte-sandbox__entete">
+      <h2 id="titre-sandbox">Statut MTN MoMo sandbox</h2>
+      <span class="badge badge-neutre"><span aria-hidden="true">i</span> Aperçu — données factices</span>
+    </div>
+    <dl class="stats">
+      <div class="stat"><dt>Dernière exécution</dt><dd>{{ apercu_sandbox.derniere_execution }}</dd></div>
+      <div class="stat"><dt>Succès 24 h</dt><dd>{{ apercu_sandbox.succes_24h }}</dd></div>
+      <div class="stat"><dt>Succès 7 j</dt><dd>{{ apercu_sandbox.succes_7j }}</dd></div>
+      <div class="stat"><dt>Latence moyenne</dt><dd>{{ apercu_sandbox.latence_moyenne }}</dd></div>
+      <div class="stat"><dt>Dernière erreur</dt><dd>{{ apercu_sandbox.derniere_erreur }}</dd></div>
+    </dl>
+    <p class="hint">Aperçu illustratif en attendant la page <code>/statut</code> (phase 5) : aucune donnée réelle n'est affichée ici.</p>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="titre-exemples">
+  <div class="section__entete">
+    <h2 id="titre-exemples">Recettes d'exemple</h2>
+    <span class="badge badge-neutre"><span aria-hidden="true">i</span> Exemples codés en dur</span>
+  </div>
+  <div class="grille-cartes">
+    {% for recette in recettes_exemple %}
+      {{ carte_recette(recette) }}
+    {% endfor %}
+  </div>
+  <p class="hint">Ces trois fiches sont des exemples : la base de recettes arrive à la phase suivante.</p>
+</section>
+
+<section id="contribuer" class="section section--appel" aria-labelledby="titre-contribuer">
+  <h2 id="titre-contribuer">Une recette qui vous a pris une journée à trouver&nbsp;?</h2>
+  <p>Écrivez-la une fois, elle servira à toute l'Afrique francophone. Quinze minutes suffisent&nbsp;:
+     un problème, des étapes, du code, les pièges.</p>
+  <p>{{ bouton('Contribuer au dépôt', 'https://github.com/Ymax27', 'secondaire') }}</p>
+</section>
